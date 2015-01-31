@@ -80,7 +80,7 @@ def main():
 	humidity, temperature = Adafruit_DHT.read_retry(TEMP_SENSOR, TEMP_SENSING_PIN)
     
 	data['humidity'] = humidity
-	data['tempearture'] = temperature
+	data['temperature'] = temperature
         
 
 	# Note that sometimes you won't get a reading and
