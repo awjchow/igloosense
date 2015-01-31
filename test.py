@@ -53,6 +53,7 @@ def Send_Data_To_Parse(data):
 	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
 
 	r = requests.post(url, data=json.dumps(payload), headers=headers)
+	print r.text
 
 
 def main():
@@ -102,7 +103,8 @@ def main():
 	motion = Motion_Sensing(MOTION_SENSING_PIN)
 	data['motion'] = motion
 	print "Motion boolean : ", motion
-
+	print "Sending data to parse ... "
+	Send_Data_To_Parse(data)
 
 
 if __name__ == '__main__':
