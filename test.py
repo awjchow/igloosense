@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import time
 import datetime
 import requests
+import json
 from Adafruit_CharLCD import Adafruit_CharLCD
 
 
