@@ -3,6 +3,7 @@ import Adafruit_DHT
 import RPi.GPIO as GPIO
 import time
 import datetime
+import Adafruit_CharLCD
 
 
 def Resolve_Light(score):
@@ -43,6 +44,10 @@ def Motion_Sensing(pin):
 
 def main():
 	GPIO.setmode(GPIO.BCM)
+
+	lcd = Adafruit_CharLCD.Adafruit_CharLCD()
+	lcd.clear()
+
 	# Available sensors
 	sensor_args = { '11': Adafruit_DHT.DHT11,
 	    '22': Adafruit_DHT.DHT22,
@@ -63,6 +68,7 @@ def main():
 	# If this happens try again!
 	if humidity is not None and temperature is not None:
 		print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
+		lcd.message(" Your temperature\n "+temperature)
 	else:
 		print 'Failed to get reading. Try again!'
 
