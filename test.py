@@ -1,5 +1,4 @@
 import sys
-
 import Adafruit_DHT
 import RPi.GPIO as GPIO
 import time
@@ -31,7 +30,7 @@ def RC_Analog(pin):
 
 def main():
 	GPIO.setmode(GPIO.BCM)
-	# Parse command line parameters.
+	# Available sensors
 	sensor_args = { '11': Adafruit_DHT.DHT11,
 	    '22': Adafruit_DHT.DHT22,
 	    '2302': Adafruit_DHT.AM2302 }
@@ -39,7 +38,7 @@ def main():
 
 	# Try to grab a sensor reading.  Use the read_retry method which will retry up
 	# to 15 times to get a sensor reading (waiting 2 seconds between each retry).
-	TEMP_SENSOR = '22'
+	TEMP_SENSOR = Adafruit_DHT.DHT22
 	TEMP_SENSING_PIN = '17'
 	
 
