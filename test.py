@@ -33,13 +33,12 @@ def Motion_Sensing(pin):
 	Current_State  = 0
 	Previous_State = 0
 	print "Waiting for PIR to settle ...", datetime.datetime.now()
-    # Loop until PIR output is 0
-    while GPIO.input(pin)==1:
-        Current_State  = 0
-    #wait 1 second before polling the pin
-    time.sleep(1)
-    return GPIO.input(pin)
-
+	# Loop until PIR output is 0
+	while GPIO.input(pin)==1:
+		Current_State  = 0
+	#wait 1 second before polling the pin
+	time.sleep(1)
+	return GPIO.input(pin)
 
 
 def main():
