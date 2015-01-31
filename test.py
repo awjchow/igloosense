@@ -68,7 +68,7 @@ def main():
 	# If this happens try again!
 	if humidity is not None and temperature is not None:
 		print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
-		lcd.message(" Your temperature\n "+temperature)
+		lcd.message(" Your temperature\n "+"Temp={0:0.1f}*C".format(temperature))
 	else:
 		print 'Failed to get reading. Try again!'
 
