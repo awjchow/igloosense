@@ -109,4 +109,23 @@ def main():
 
 
 if __name__ == '__main__':
-	main()
+	if len(sys.argv) == 2:
+		if sys.argv[1] == 'once':
+			main()
+		elif sys.argv[1] == 'repeat':
+			while True:
+				main()
+				time.sleep(3)
+		else:
+			print """---usage: python test.py once OR python test.py repeat
+						once: poll all sensors once and fire to parse.
+						repeat: poll all sensors in intervals of 5 seconds and fire to parse."""
+	else:
+		print """---usage: python test.py once OR python test.py repeat
+					once: poll all sensors once and fire to parse.
+					repeat: poll all sensors in intervals of 5 seconds and fire to parse."""
+
+
+
+
+
