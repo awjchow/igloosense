@@ -3,7 +3,7 @@ import Adafruit_DHT
 import RPi.GPIO as GPIO
 import time
 import datetime
-import Adafruit_CharLCD
+from Adafruit_CharLCD import Adafruit_CharLCD
 
 
 def Resolve_Light(score):
@@ -45,7 +45,7 @@ def Motion_Sensing(pin):
 def main():
 	GPIO.setmode(GPIO.BCM)
 
-	lcd = Adafruit_CharLCD.Adafruit_CharLCD()
+	lcd = Adafruit_CharLCD()
 	lcd.clear()
 
 	# Available sensors
