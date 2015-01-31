@@ -3,6 +3,7 @@ import Adafruit_DHT
 import RPi.GPIO as GPIO
 import time
 import datetime
+import requests
 from Adafruit_CharLCD import Adafruit_CharLCD
 
 
@@ -26,20 +27,32 @@ def RC_Analog(pin):
 		counter += 1
 		#time.sleep(0.1)
 	#print GPIO.input(pin)
-	return Resolve_Light(counter)
+	return 1 - Resolve_Light(counter)
 
 def Motion_Sensing(pin):
 	GPIO.setup(pin,GPIO.IN)      # Echo
-
-	Current_State  = 0
-	Previous_State = 0
 	print "Waiting for PIR to settle ...", datetime.datetime.now()
 	# Loop until PIR output is 0
-	while GPIO.input(pin)==1:
-		Current_State  = 0
-	#wait 1 second before polling the pin
-	time.sleep(1)
+	current_state = GPIO.input(pin)
+	#wait 3 second before polling the pin to get results
+	time.sleep(3)
 	return GPIO.input(pin)
+
+def Send_Data_To_Parse(data):
+	url = 'https://api.parse.com/1/classes/IglooHeadquarters'
+
+	payload = {'sensorId':'3',
+		'sensorName':'IglooHeadquarters',
+		'temperature':data['temperature'],
+		'motion':data['motion'],
+		'brightness':data['brightness'],
+		'humidity':data['humidity']}
+
+	headers = {'content-type':'application/json',
+	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
+	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
+
+	r = requests.post(url, data=json.dumps(payload), headers=headers)
 
 
 def main():
@@ -47,11 +60,13 @@ def main():
 
 	lcd = Adafruit_CharLCD()
 	lcd.clear()
+    
+	data = {'temperature':0,'motion':0,'brightness':0,'humidity':0}
 
 	# Available sensors
 	sensor_args = { '11': Adafruit_DHT.DHT11,
 	    '22': Adafruit_DHT.DHT22,
-	    '2302': Adafruit_DHT.AM2302 }
+	    '2302': Adafruit_DHT.AM2302}
 
 
 	# Try to grab a sensor reading.  Use the read_retry method which will retry up
@@ -61,6 +76,10 @@ def main():
 	
 
 	humidity, temperature = Adafruit_DHT.read_retry(TEMP_SENSOR, TEMP_SENSING_PIN)
+    
+	data['humidity'] = humidity
+	data['tempearture'] = temperature
+        
 
 	# Note that sometimes you won't get a reading and
 	# the results will be null (because Linux can't
@@ -73,10 +92,17 @@ def main():
 		print 'Failed to get reading. Try again!'
 
 	LIGHT_SENSING_PIN = 26
-	print "My measurement of strength of light via counting of loops :",RC_Analog(LIGHT_SENSING_PIN)
+	light_strength = RC_Analog(LIGHT_SENSING_PIN)
+
+	data['brightness'] = light_strength
+
+	print "My measurement of strength of light via counting of loops :", light_strength
 
 	MOTION_SENSING_PIN = 13
-	print "Motion level : ",Motion_Sensing(MOTION_SENSING_PIN)
+	motion = Motion_Sensing(MOTION_SENSING_PIN)
+	data['motion'] = motion
+	print "Motion boolean : ", motion
+
 
 
 if __name__ == '__main__':
