@@ -52,9 +52,11 @@ def Send_Data_To_Parse(data):
 	headers = {'content-type':'application/json',
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
 	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
-
-	r = requests.post(url, data=json.dumps(payload), headers=headers)
-	print r.text
+	try:
+		r = requests.post(url, data=json.dumps(payload), headers=headers)
+		print r.text
+	except Exception,e:
+		print "Failed connecting with error: ",e
 
 
 def main():
