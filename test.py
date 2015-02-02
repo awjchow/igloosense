@@ -32,7 +32,7 @@ def RC_Analog(pin):
 
 def Motion_Sensing(pin):
 	GPIO.setup(pin,GPIO.IN)      # Echo
-	print "Waiting for PIR to settle ...", datetime.datetime.now()
+	#print "Waiting for PIR to settle ...", datetime.datetime.now()
 	# Loop until PIR output is 0
 	current_state = GPIO.input(pin)
 	#wait 3 second before polling the pin to get results
@@ -54,7 +54,7 @@ def Send_Data_To_Parse(data):
 	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
 	try:
 		r = requests.post(url, data=json.dumps(payload), headers=headers)
-		print r.text
+		#print r.text
 	except Exception,e:
 		print "Failed connecting with error: ",e
 
@@ -81,8 +81,7 @@ def main():
 
 	humidity, temperature = Adafruit_DHT.read_retry(TEMP_SENSOR, TEMP_SENSING_PIN)
     
-	data['humidity'] = humidity
-	data['temperature'] = temperature
+
         
 
 	# Note that sometimes you won't get a reading and
@@ -90,23 +89,27 @@ def main():
 	# guarantee the timing of calls to read the sensor).
 	# If this happens try again!
 	if humidity is not None and temperature is not None:
-		print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
+		data['humidity'] = humidity
+		data['temperature'] = temperature
+		#print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
 		lcd.message(" Your temperature\n "+"Temp={0:0.1f}*C".format(temperature))
 	else:
-		print 'Failed to get reading. Try again!'
+		#print 'Failed to get reading. Try again!'
+		data['humidity'] = 0
+		data['temperature'] = 0
 
 	LIGHT_SENSING_PIN = 26
 	light_strength = RC_Analog(LIGHT_SENSING_PIN)
 
 	data['brightness'] = light_strength
 
-	print "My measurement of strength of light via counting of loops :", light_strength
+	#print "My measurement of strength of light via counting of loops :", light_strength
 
 	MOTION_SENSING_PIN = 13
 	motion = Motion_Sensing(MOTION_SENSING_PIN)
 	data['motion'] = motion
-	print "Motion boolean : ", motion
-	print "Sending data to parse ... "
+	#print "Motion boolean : ", motion
+	#print "Sending data to parse ... "
 	Send_Data_To_Parse(data)
 
 
