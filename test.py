@@ -15,29 +15,37 @@ def Resolve_Light(score):
     return score
 
 def RC_Analog(pin):
-	counter = 0
-	
-	#Discharge capicator, set output to low
-	GPIO.setup(pin,GPIO.OUT)
-	GPIO.output(pin,GPIO.LOW)
-	time.sleep(1)
-	GPIO.setup(pin,GPIO.IN)
-	#count loops until voltage across capicator reads high on GPIO
-	while(GPIO.input(pin)==GPIO.LOW):
-		#print "My Pin current: ", GPIO.input(pin)
-		counter += 1
-		#time.sleep(0.1)
-	#print GPIO.input(pin)
-	return 1 - Resolve_Light(counter)
+	try:
+		counter = 0
+		
+		#Discharge capicator, set output to low
+		GPIO.setup(pin,GPIO.OUT)
+		GPIO.output(pin,GPIO.LOW)
+		time.sleep(1)
+		GPIO.setup(pin,GPIO.IN)
+		#count loops until voltage across capicator reads high on GPIO
+		while(GPIO.input(pin)==GPIO.LOW and counter<200):
+			#print "My Pin current: ", GPIO.input(pin)
+			counter += 1
+			#time.sleep(0.1)
+		#print GPIO.input(pin)
+		return 1 - Resolve_Light(counter)
+	except Exception,e:
+		print "Error with light sensing with error : ",e
+		return 0
 
 def Motion_Sensing(pin):
-	GPIO.setup(pin,GPIO.IN)      # Echo
-	#print "Waiting for PIR to settle ...", datetime.datetime.now()
-	# Loop until PIR output is 0
-	current_state = GPIO.input(pin)
-	#wait 3 second before polling the pin to get results
-	time.sleep(3)
-	return GPIO.input(pin)
+	try:
+		GPIO.setup(pin,GPIO.IN)      # Echo
+		#print "Waiting for PIR to settle ...", datetime.datetime.now()
+		# Loop until PIR output is 0
+		current_state = GPIO.input(pin)
+		#wait 3 second before polling the pin to get results
+		time.sleep(3)
+		return GPIO.input(pin)
+	except Exception,e:
+		print "Error with motion sensing with error : ", e
+		return 0
 
 def Send_Data_To_Parse(data):
 	url = 'https://api.parse.com/1/classes/IglooHeadquarters'
