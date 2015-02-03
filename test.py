@@ -136,7 +136,7 @@ def main():
 	if myDevicesDiscovered is not None:
 		num_devices = len(myDevicesDiscovered)
 		devices_array = []
-		for addr, name in nearby_devices:
+		for addr, name in myDevicesDiscovered:
 			devices_array.append((addr,name))
 	else:
 		num_devices = 0
