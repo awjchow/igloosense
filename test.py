@@ -68,7 +68,9 @@ def SendDataToParse(data):
 		'temperature':data['temperature'],
 		'motion':data['motion'],
 		'brightness':data['brightness'],
-		'humidity':data['humidity']}
+		'humidity':data['humidity'],
+		'numBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
+		'bluetoothDevicesDetected':data['bluetoothDevicesDetected']}
 
 	headers = {'content-type':'application/json',
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
@@ -135,6 +137,7 @@ def main():
 	motion = MotionSensing(MOTION_SENSING_PIN)
 	data['motion'] = motion
 	
+	print "Performing inquiry ... "
 	myDevicesDiscovered = BluetoothDiscovery()
 	if myDevicesDiscovered is not None:
 		num_devices = len(myDevicesDiscovered)
