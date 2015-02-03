@@ -139,14 +139,14 @@ def main():
 	
 	print "Performing inquiry ... "
 	myDevicesDiscovered = BluetoothDiscovery()
+	devices_array = []
+	num_devices = 0
+	print "Devices discovered : ", myDevicesDiscovered
 	if myDevicesDiscovered is not None:
 		num_devices = len(myDevicesDiscovered)
-		devices_array = []
 		for addr, name in myDevicesDiscovered:
 			devices_array.append((addr,name))
-	else:
-		num_devices = 0
-		devices_array = []
+
 
 	data['numBluetoothDevicesDetected'] = num_devices
 	data['bluetoothDevicesDetected'] = devices_array
