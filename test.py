@@ -49,7 +49,6 @@ def MotionSensing(pin):
 		return 0
 
 def BluetoothDiscovery():
-	print "hello"
 	try:
 		nearby_devices = bluetooth.discover_devices(lookup_names = True)
 		for addr, name in nearby_devices:
@@ -138,11 +137,11 @@ def main():
 	motion = MotionSensing(MOTION_SENSING_PIN)
 	data['motion'] = motion
 	
-	print "Performing inquiry ... "
+	#print "Performing inquiry ... "
 	myDevicesDiscovered = BluetoothDiscovery()
 	devices_array = []
 	num_devices = 0
-	print "Devices discovered : ", myDevicesDiscovered
+	#print "Devices discovered : ", myDevicesDiscovered
 	if myDevicesDiscovered is not None:
 		num_devices = len(myDevicesDiscovered)
 		for addr, name in myDevicesDiscovered:
