@@ -6,15 +6,16 @@ import datetime
 import requests
 import json
 from Adafruit_CharLCD import Adafruit_CharLCD
+import bluetooth
 
 
-def Resolve_Light(score):
+def ResolveLight(score):
     LOWEST = 70     #brightest
     HIGHEST = 175   #darkest
     score = (score - LOWEST) / float(HIGHEST - LOWEST)
     return score
 
-def RC_Analog(pin):
+def RcAnalog(pin):
 	try:
 		counter = 0
 		
@@ -29,12 +30,12 @@ def RC_Analog(pin):
 			counter += 1
 			#time.sleep(0.1)
 		#print GPIO.input(pin)
-		return 1 - Resolve_Light(counter)
+		return 1 - ResolveLight(counter)
 	except Exception,e:
 		print "Error with light sensing with error : ",e
 		return 0
 
-def Motion_Sensing(pin):
+def MotionSensing(pin):
 	try:
 		GPIO.setup(pin,GPIO.IN)      # Echo
 		#print "Waiting for PIR to settle ...", datetime.datetime.now()
@@ -47,7 +48,16 @@ def Motion_Sensing(pin):
 		print "Error with motion sensing with error : ", e
 		return 0
 
-def Send_Data_To_Parse(data):
+def BluetoothDiscovery():
+	try:
+		nearby_devices = bluetooth.discover_devices(lookup_names = True)
+		return nearby_devices
+	except:
+		return None
+
+
+
+def SendDataToParse(data):
 	url = 'https://api.parse.com/1/classes/IglooHeadquarters'
 
 	payload = {'sensorId':'3',
@@ -73,7 +83,12 @@ def main():
 	lcd = Adafruit_CharLCD()
 	lcd.clear()
     
-	data = {'temperature':0,'motion':0,'brightness':0,'humidity':0}
+	data = {'temperature':0,
+			'motion':0,
+			'brightness':0,
+			'humidity':0,
+			'numBluetoothDevicesDetected':0,
+			'bluetoothDevicesDetected':[]}
 
 	# Available sensors
 	sensor_args = { '11': Adafruit_DHT.DHT11,
@@ -100,25 +115,41 @@ def main():
 		data['humidity'] = humidity
 		data['temperature'] = temperature
 		#print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
-		lcd.message(" Your temperature\n "+"Temp={0:0.1f}*C".format(temperature))
+		lcd.message("Your temperature\n"+"Temp={0:0.1f}*C".format(temperature))
 	else:
 		#print 'Failed to get reading. Try again!'
 		data['humidity'] = 0
 		data['temperature'] = 0
 
 	LIGHT_SENSING_PIN = 26
-	light_strength = RC_Analog(LIGHT_SENSING_PIN)
+	light_strength = RcAnalog(LIGHT_SENSING_PIN)
 
 	data['brightness'] = light_strength
 
 	#print "My measurement of strength of light via counting of loops :", light_strength
 
 	MOTION_SENSING_PIN = 13
-	motion = Motion_Sensing(MOTION_SENSING_PIN)
+	motion = MotionSensing(MOTION_SENSING_PIN)
 	data['motion'] = motion
+	
+	myDevicesDiscovered = BluetoothDiscovery()
+	if myDevicesDiscovered is not None:
+		num_devices = len(myDevicesDiscovered)
+		devices_array = []
+		for addr, name in nearby_devices:
+			devices_array.append((addr,name))
+	else:
+		num_devices = 0
+		devices_array = []
+
+	data['numBluetoothDevicesDetected'] = num_devices
+	data['bluetoothDevicesDetected'] = devices_array
+
 	#print "Motion boolean : ", motion
 	#print "Sending data to parse ... "
-	Send_Data_To_Parse(data)
+
+
+	SendDataToParse(data)
 
 
 if __name__ == '__main__':
@@ -128,7 +159,7 @@ if __name__ == '__main__':
 		elif sys.argv[1] == 'repeat':
 			while True:
 				main()
-				time.sleep(3)
+				time.sleep(1)
 		else:
 			print """---usage: python test.py once OR python test.py repeat
 						once: poll all sensors once and fire to parse.
