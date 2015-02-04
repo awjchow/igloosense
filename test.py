@@ -21,7 +21,7 @@ def LoginUser(USERNAME,PASSWORD):
 	return r['sessionToken'], r['objectId']
 
 
-def CheckUserStatus(USER_ID,SESSION_TOKEN):
+def CheckUserStatus(USER_ID,SESSION_TOKEN,MY_LCD):
 	url = 'https://api.parse.com/1/users/' + USER_ID
 
 	headers = {'content-type':'application/json',
@@ -44,9 +44,9 @@ def CheckUserStatus(USER_ID,SESSION_TOKEN):
 			if messageChange:
 				myMessage = r['message']
 				print myMessage
-				lcd = Adafruit_CharLCD()
-				lcd.clear()
-				lcd.message(myMessage)
+
+				MY_LCD.clear()
+				MY_LCD.message(myMessage)
 				data = {'messageChange':False}
 				g = requests.put(url,data=json.dumps(data),headers=headers)
 				print g
@@ -137,12 +137,13 @@ def main(USERNAME,PASSWORD):
 
 	sessionToken, objectID = LoginUser(USERNAME,PASSWORD)
 	messageDelayCountdown = 0
+	GPIO.setmode(GPIO.BCM)
+
+	lcd = Adafruit_CharLCD()
+	lcd.clear()
 	while True:
 
-		GPIO.setmode(GPIO.BCM)
 
-		lcd = Adafruit_CharLCD()
-		lcd.clear()
 	    
 		data = {'temperature':0,
 				'motion':0,
@@ -213,7 +214,7 @@ def main(USERNAME,PASSWORD):
 
 		SendDataToParse(data)
 
-		detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = CheckUserStatus(objectID,sessionToken)
+		detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = CheckUserStatus(objectID,sessionToken,lcd)
 		if detectedMessageChange:
 			messageDelayCountdown = 5
 
