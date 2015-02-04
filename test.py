@@ -9,6 +9,9 @@ from Adafruit_CharLCD import Adafruit_CharLCD
 import bluetooth
 
 def CheckUserStatus(USER_ID):
+
+	print "Checking user status ... "
+
 	url = 'https://api.parse.com/1/users/' + USER_ID
 
 	headers = {'content-type':'application/json',
