@@ -8,45 +8,56 @@ import json
 from Adafruit_CharLCD import Adafruit_CharLCD
 import bluetooth
 
-def CheckUserStatus(USER_ID):
+def LoginUser(USERNAME,PASSWORD):
+	url = 'https://api.parse.com/1/login'
 
-	print "Checking user status ... "
+	headers = {'content-type':'application/json',
+	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
+	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}	
 
+	payload = {"username":USERNAME,"password":PASSWORD}
+	r = requests.get(url,params=payload, headers=headers)
+	r = json.loads(r.text)
+	return r['sessionToken'], r['objectId']
+
+
+def CheckUserStatus(USER_ID,SESSION_TOKEN):
 	url = 'https://api.parse.com/1/users/' + USER_ID
 
 	headers = {'content-type':'application/json',
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
-	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
+	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
+	    'X-Parse-Session-Token': SESSION_TOKEN }
 
 	airconStatusChange = False
 	temperatureChange = False
 	messageChange = False
-
 	try:
 		r = requests.get(url, headers=headers)
 		print r.text
-		r = json.loads(r)
-		print r
+		r = json.loads(r.text)
 		airconStatusChange = r['airconStatusChange']
 		temperatureChange = r['airconTemperatureChange']
 		messageChange = r['messageChange']
 		print messageChange
 		if (airconStatusChange or temperatureChange or messageChange):
 			if messageChange:
-				print "message Change detected"
 				myMessage = r['message']
+				print myMessage
 				lcd = Adafruit_CharLCD()
 				lcd.clear()
 				lcd.message(message)
 				data = {'messageChange':False}
-				g = requests.post(url,data=json.dump(data),headers=headers)
+				g = requests.put(url,data=json.dumps(data),headers=headers)
+				print g
 				print g.text
 
 
 	except Exception,e:
 		print "Failed connecting with error: ",e
-
 	return airconStatusChange, temperatureChange, messageChange
+
+
 
 
 def ResolveLight(score):
@@ -122,8 +133,9 @@ def SendDataToParse(data):
 		print "Failed connecting with error: ",e
 
 
-def main():
+def main(USERNAME,PASSWORD):
 
+	sessionToken, objectID = LoginUser(USERNAME,PASSWORD)
 	messageDelayCountdown = 0
 	while True:
 
@@ -201,9 +213,7 @@ def main():
 
 		SendDataToParse(data)
 
-
-		MY_USER_ID = 'L5WgX2wJez'
-		detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = CheckUserStatus(MY_USER_ID)
+		detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = CheckUserStatus(objectID,sessionToken)
 		if detectedMessageChange:
 			messageDelayCountdown = 5
 
@@ -214,15 +224,10 @@ def main():
 
 
 if __name__ == '__main__':
-	if len(sys.argv) == 2:
-		if sys.argv[1] == 'once':
-			main()
-		elif sys.argv[1] == 'repeat':
-			main()
-		else:
-			print """---usage: python test.py once OR python test.py repeat
-						once: poll all sensors once and fire to parse.
-						repeat: poll all sensors in intervals of 5 seconds and fire to parse."""
+	if len(sys.argv) == 1:
+			USERNAME = 'igloo'
+			PASSWORD = 'igloo'
+			main(USERNAME,PASSWORD)
 	else:
 		print """---usage: python test.py once OR python test.py repeat
 					once: poll all sensors once and fire to parse.
