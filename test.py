@@ -8,6 +8,39 @@ import json
 from Adafruit_CharLCD import Adafruit_CharLCD
 import bluetooth
 
+def checkUserStatus(USER_ID):
+	url = 'https://api.parse.com/1/users/' + USER_ID
+
+	headers = {'content-type':'application/json',
+	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
+	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
+
+	airconStatusChange = False
+	temperatureChange = False
+	messageChange = False
+
+	try:
+		r = requests.get(url, headers=headers)
+		print r.text
+		airconStatusChange = r['airconStatusChange']
+		temperatureChange = r['airconTemperatureChange']
+		messageChange = r['messageChange']
+		if (airconStatusChange or temperatureChange or messageChange):
+			if messageChange:
+				myMessage = r['message']
+				lcd = Adafruit_CharLCD()
+				lcd.clear()
+				lcd.message(message)
+				data = {'messageChange':False}
+				g = requests.post(url,data=json.dump(data),headers=headers)
+				
+
+
+	except Exception,e:
+		print "Failed connecting with error: ",e
+
+	return airconStatusChange, temperatureChange, messageChange
+
 
 def ResolveLight(score):
     LOWEST = 70     #brightest
@@ -83,6 +116,9 @@ def SendDataToParse(data):
 
 
 def main():
+
+
+
 	GPIO.setmode(GPIO.BCM)
 
 	lcd = Adafruit_CharLCD()
@@ -110,8 +146,6 @@ def main():
 	humidity, temperature = Adafruit_DHT.read_retry(TEMP_SENSOR, TEMP_SENSING_PIN)
     
 
-        
-
 	# Note that sometimes you won't get a reading and
 	# the results will be null (because Linux can't
 	# guarantee the timing of calls to read the sensor).
@@ -120,7 +154,9 @@ def main():
 		data['humidity'] = humidity
 		data['temperature'] = temperature
 		#print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
-		lcd.message("Your temperature\n"+"Temp={0:0.1f}*C".format(temperature))
+
+		if messageDelayCountdown == 0:
+			lcd.message("Your temperature\n"+"Temp={0:0.1f}*C".format(temperature))
 	else:
 		#print 'Failed to get reading. Try again!'
 		data['humidity'] = 0
@@ -158,11 +194,23 @@ def main():
 	SendDataToParse(data)
 
 
+	MY_USER_ID = 'L5WgX2wJez'
+	detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = checkUserStatus(MY_USER_ID)
+	if detectedMessageChange:
+		messageDelayCountdown = 5
+
+	if messageDelayCountdown > 0:
+		messageDelayCountdown -= 1
+
+
+
+
 if __name__ == '__main__':
 	if len(sys.argv) == 2:
 		if sys.argv[1] == 'once':
 			main()
 		elif sys.argv[1] == 'repeat':
+			global messageDelayCountdown
 			while True:
 				main()
 				time.sleep(1)
