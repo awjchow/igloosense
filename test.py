@@ -46,7 +46,7 @@ def CheckUserStatus(USER_ID,SESSION_TOKEN):
 				print myMessage
 				lcd = Adafruit_CharLCD()
 				lcd.clear()
-				lcd.message(message)
+				lcd.message(myMessage)
 				data = {'messageChange':False}
 				g = requests.put(url,data=json.dumps(data),headers=headers)
 				print g
