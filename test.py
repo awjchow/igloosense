@@ -34,23 +34,23 @@ def CheckUserStatus(USER_ID,SESSION_TOKEN,MY_LCD):
 	messageChange = False
 	try:
 		r = requests.get(url, headers=headers)
-		print r.text
+		#print r.text
 		r = json.loads(r.text)
 		airconStatusChange = r['airconStatusChange']
 		temperatureChange = r['airconTemperatureChange']
 		messageChange = r['messageChange']
-		print messageChange
+		#print messageChange
 		if (airconStatusChange or temperatureChange or messageChange):
 			if messageChange:
 				myMessage = r['message']
-				print myMessage
+				#print myMessage
 
 				MY_LCD.clear()
 				MY_LCD.message(myMessage)
 				data = {'messageChange':False}
 				g = requests.put(url,data=json.dumps(data),headers=headers)
-				print g
-				print g.text
+				#print g
+				#print g.text
 
 
 	except Exception,e:
@@ -177,6 +177,7 @@ def main(USERNAME,PASSWORD):
 			#print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
 
 			if messageDelayCountdown == 0:
+				lcd.clear()
 				lcd.message("Your temperature\n"+"Temp={0:0.1f}*C".format(temperature))
 		else:
 			#print 'Failed to get reading. Try again!'
@@ -216,7 +217,7 @@ def main(USERNAME,PASSWORD):
 
 		detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = CheckUserStatus(objectID,sessionToken,lcd)
 		if detectedMessageChange:
-			messageDelayCountdown = 5
+			messageDelayCountdown = 2
 
 		if messageDelayCountdown > 0:
 			messageDelayCountdown -= 1
