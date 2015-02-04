@@ -25,6 +25,7 @@ def CheckUserStatus(USER_ID):
 	try:
 		r = requests.get(url, headers=headers)
 		print r.text
+		r = json.loads(r)
 		airconStatusChange = r['airconStatusChange']
 		temperatureChange = r['airconTemperatureChange']
 		messageChange = r['messageChange']
