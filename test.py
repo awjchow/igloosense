@@ -206,7 +206,7 @@ def main():
 		if messageDelayCountdown > 0:
 			messageDelayCountdown -= 1
 
-
+		time.sleep(2)
 
 
 if __name__ == '__main__':
