@@ -8,7 +8,7 @@ import json
 from Adafruit_CharLCD import Adafruit_CharLCD
 import bluetooth
 
-def checkUserStatus(USER_ID):
+def CheckUserStatus(USER_ID):
 	url = 'https://api.parse.com/1/users/' + USER_ID
 
 	headers = {'content-type':'application/json',
@@ -84,8 +84,8 @@ def MotionSensing(pin):
 def BluetoothDiscovery():
 	try:
 		nearby_devices = bluetooth.discover_devices(lookup_names = True)
-		for addr, name in nearby_devices:
-			print("  %s - %s" % (addr, name))
+		#for addr, name in nearby_devices:
+		#	print("  %s - %s" % (addr, name))
 		return nearby_devices
 	except Exception,e:
 		print "Error with bluetooth discovery with error : ", e
@@ -117,90 +117,91 @@ def SendDataToParse(data):
 
 def main():
 
+	messageDelayCountdown = 0
+	while True:
+
+		GPIO.setmode(GPIO.BCM)
+
+		lcd = Adafruit_CharLCD()
+		lcd.clear()
+	    
+		data = {'temperature':0,
+				'motion':0,
+				'brightness':0,
+				'humidity':0,
+				'numBluetoothDevicesDetected':0,
+				'bluetoothDevicesDetected':[]}
+
+		# Available sensors
+		sensor_args = { '11': Adafruit_DHT.DHT11,
+		    '22': Adafruit_DHT.DHT22,
+		    '2302': Adafruit_DHT.AM2302}
 
 
-	GPIO.setmode(GPIO.BCM)
+		# Try to grab a sensor reading.  Use the read_retry method which will retry up
+		# to 15 times to get a sensor reading (waiting 2 seconds between each retry).
+		TEMP_SENSOR = Adafruit_DHT.DHT22
+		TEMP_SENSING_PIN = '17'
+		
 
-	lcd = Adafruit_CharLCD()
-	lcd.clear()
-    
-	data = {'temperature':0,
-			'motion':0,
-			'brightness':0,
-			'humidity':0,
-			'numBluetoothDevicesDetected':0,
-			'bluetoothDevicesDetected':[]}
+		humidity, temperature = Adafruit_DHT.read_retry(TEMP_SENSOR, TEMP_SENSING_PIN)
+	    
 
-	# Available sensors
-	sensor_args = { '11': Adafruit_DHT.DHT11,
-	    '22': Adafruit_DHT.DHT22,
-	    '2302': Adafruit_DHT.AM2302}
+		# Note that sometimes you won't get a reading and
+		# the results will be null (because Linux can't
+		# guarantee the timing of calls to read the sensor).
+		# If this happens try again!
+		if humidity is not None and temperature is not None:
+			data['humidity'] = humidity
+			data['temperature'] = temperature
+			#print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
 
+			if messageDelayCountdown == 0:
+				lcd.message("Your temperature\n"+"Temp={0:0.1f}*C".format(temperature))
+		else:
+			#print 'Failed to get reading. Try again!'
+			data['humidity'] = 0
+			data['temperature'] = 0
 
-	# Try to grab a sensor reading.  Use the read_retry method which will retry up
-	# to 15 times to get a sensor reading (waiting 2 seconds between each retry).
-	TEMP_SENSOR = Adafruit_DHT.DHT22
-	TEMP_SENSING_PIN = '17'
-	
+		LIGHT_SENSING_PIN = 26
+		light_strength = RcAnalog(LIGHT_SENSING_PIN)
 
-	humidity, temperature = Adafruit_DHT.read_retry(TEMP_SENSOR, TEMP_SENSING_PIN)
-    
+		data['brightness'] = light_strength
 
-	# Note that sometimes you won't get a reading and
-	# the results will be null (because Linux can't
-	# guarantee the timing of calls to read the sensor).
-	# If this happens try again!
-	if humidity is not None and temperature is not None:
-		data['humidity'] = humidity
-		data['temperature'] = temperature
-		#print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
+		#print "My measurement of strength of light via counting of loops :", light_strength
 
-		if messageDelayCountdown == 0:
-			lcd.message("Your temperature\n"+"Temp={0:0.1f}*C".format(temperature))
-	else:
-		#print 'Failed to get reading. Try again!'
-		data['humidity'] = 0
-		data['temperature'] = 0
-
-	LIGHT_SENSING_PIN = 26
-	light_strength = RcAnalog(LIGHT_SENSING_PIN)
-
-	data['brightness'] = light_strength
-
-	#print "My measurement of strength of light via counting of loops :", light_strength
-
-	MOTION_SENSING_PIN = 13
-	motion = MotionSensing(MOTION_SENSING_PIN)
-	data['motion'] = motion
-	
-	#print "Performing inquiry ... "
-	myDevicesDiscovered = BluetoothDiscovery()
-	devices_array = []
-	num_devices = 0
-	#print "Devices discovered : ", myDevicesDiscovered
-	if myDevicesDiscovered is not None:
-		num_devices = len(myDevicesDiscovered)
-		for addr, name in myDevicesDiscovered:
-			devices_array.append((addr,name))
+		MOTION_SENSING_PIN = 13
+		motion = MotionSensing(MOTION_SENSING_PIN)
+		data['motion'] = motion
+		
+		#print "Performing inquiry ... "
+		myDevicesDiscovered = BluetoothDiscovery()
+		devices_array = []
+		num_devices = 0
+		#print "Devices discovered : ", myDevicesDiscovered
+		if myDevicesDiscovered is not None:
+			num_devices = len(myDevicesDiscovered)
+			for addr, name in myDevicesDiscovered:
+				devices_array.append((addr,name))
 
 
-	data['numBluetoothDevicesDetected'] = num_devices
-	data['bluetoothDevicesDetected'] = devices_array
+		data['numBluetoothDevicesDetected'] = num_devices
+		data['bluetoothDevicesDetected'] = devices_array
 
-	#print "Motion boolean : ", motion
-	#print "Sending data to parse ... "
-
-
-	SendDataToParse(data)
+		#print "Motion boolean : ", motion
+		#print "Sending data to parse ... "
 
 
-	MY_USER_ID = 'L5WgX2wJez'
-	detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = checkUserStatus(MY_USER_ID)
-	if detectedMessageChange:
-		messageDelayCountdown = 5
+		SendDataToParse(data)
 
-	if messageDelayCountdown > 0:
-		messageDelayCountdown -= 1
+
+		MY_USER_ID = 'L5WgX2wJez'
+		detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = CheckUserStatus(MY_USER_ID)
+		if detectedMessageChange:
+			messageDelayCountdown = 5
+
+		if messageDelayCountdown > 0:
+			messageDelayCountdown -= 1
 
 
 
@@ -210,10 +211,7 @@ if __name__ == '__main__':
 		if sys.argv[1] == 'once':
 			main()
 		elif sys.argv[1] == 'repeat':
-			global messageDelayCountdown
-			while True:
-				main()
-				time.sleep(1)
+			main()
 		else:
 			print """---usage: python test.py once OR python test.py repeat
 						once: poll all sensors once and fire to parse.
