@@ -26,16 +26,19 @@ def CheckUserStatus(USER_ID):
 		r = requests.get(url, headers=headers)
 		print r.text
 		r = json.loads(r)
+		print r
 		airconStatusChange = r['airconStatusChange']
 		temperatureChange = r['airconTemperatureChange']
 		messageChange = r['messageChange']
+		print messageChange
 		if (airconStatusChange or temperatureChange or messageChange):
 			if messageChange:
+				print "message Change detected"
 				myMessage = r['message']
 				lcd = Adafruit_CharLCD()
 				lcd.clear()
 				lcd.message(message)
-				data = {'messageChange':'false'}
+				data = {'messageChange':False}
 				g = requests.post(url,data=json.dump(data),headers=headers)
 				print g.text
 
