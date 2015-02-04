@@ -54,7 +54,7 @@ def CheckUserStatus(USER_ID,SESSION_TOKEN,MY_LCD):
 
 
 	except Exception,e:
-		print "Failed connecting with error: ",e
+		print "Failed connecting with error at status check: ",e
 	return airconStatusChange, temperatureChange, messageChange
 
 
@@ -130,7 +130,7 @@ def SendDataToParse(data):
 		r = requests.post(url, data=json.dumps(payload), headers=headers)
 		#print r.text
 	except Exception,e:
-		print "Failed connecting with error: ",e
+		print "Failed connecting with error at sending sensor data to parse: ",e
 
 
 def main(USERNAME,PASSWORD):
