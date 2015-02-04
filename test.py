@@ -31,9 +31,9 @@ def CheckUserStatus(USER_ID):
 				lcd = Adafruit_CharLCD()
 				lcd.clear()
 				lcd.message(message)
-				data = {'messageChange':False}
+				data = {'messageChange':'false'}
 				g = requests.post(url,data=json.dump(data),headers=headers)
-				
+				print g.text
 
 
 	except Exception,e:
