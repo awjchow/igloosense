@@ -111,17 +111,17 @@ def BluetoothDiscovery():
 
 
 
-def SendDataToParse(data):
-	url = 'https://api.parse.com/1/classes/IglooHeadquarters'
+def SendDataToParse(data,USER_ID,SENSOR_ID):
+	url = 'https://api.parse.com/1/classes/IgloosenseData'
 
-	payload = {'sensorId':'3',
-		'sensorName':'IglooHeadquarters',
+	payload = {'sensorId':SENSOR_ID,
 		'temperature':data['temperature'],
 		'motion':data['motion'],
 		'brightness':data['brightness'],
 		'humidity':data['humidity'],
 		'numBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
-		'bluetoothDevicesDetected':data['bluetoothDevicesDetected']}
+		'bluetoothDevicesDetected':data['bluetoothDevicesDetected'],
+		'ACL':{USER_ID:{'write':True,'read':True}}}		#sets the access control list to restrict access
 
 	headers = {'content-type':'application/json',
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
@@ -133,7 +133,7 @@ def SendDataToParse(data):
 		print "Failed connecting with error at sending sensor data to parse: ",e
 
 
-def main(USERNAME,PASSWORD):
+def main(USERNAME,PASSWORD,SENSOR_ID):
 
 	sessionToken, objectID = LoginUser(USERNAME,PASSWORD)
 	messageDelayCountdown = 0
@@ -213,7 +213,7 @@ def main(USERNAME,PASSWORD):
 		#print "Sending data to parse ... "
 
 
-		SendDataToParse(data)
+		SendDataToParse(data,objectID,SENSOR_ID)
 
 		detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = CheckUserStatus(objectID,sessionToken,lcd)
 		if detectedMessageChange:
@@ -229,7 +229,8 @@ if __name__ == '__main__':
 	if len(sys.argv) == 1:
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
-			main(USERNAME,PASSWORD)
+			SENSOR_ID = 'IglooHeadquarters'
+			main(USERNAME,PASSWORD,SENSOR_ID)
 	else:
 		print """---usage: python test.py once OR python test.py repeat
 					once: poll all sensors once and fire to parse.
