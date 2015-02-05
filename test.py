@@ -128,7 +128,7 @@ def SendDataToParse(data,USER_ID,SENSOR_ID):
 	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
 	try:
 		r = requests.post(url, data=json.dumps(payload), headers=headers)
-		print r.text
+		#print r.text
 	except Exception,e:
 		print "Failed connecting with error at sending sensor data to parse: ",e
 
