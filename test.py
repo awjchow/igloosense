@@ -22,6 +22,7 @@ def LoginUser(USERNAME,PASSWORD):
 
 
 def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
+
 	url = 'https://api.parse.com/1/Igloosense/' + SENSOR_ID
 
 	headers = {'content-type':'application/json',
@@ -128,16 +129,17 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 	except Exception,e:
 		print "Failed connecting with error at sending sensor data to parse: ",e
 
-    url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
-    payload = {'lastTemperature':data['temperature'],
+	url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
+
+	payload = {'lastTemperature':data['temperature'],
             'lastHumidity':data['humidity'],
             'lastBrightness':data['brightness'],
             'lastMotion':data['motion'],
             'lastNumBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
             'lastBluetoothPresenceArray':data['bluetoothDevicesDetected'],
             'ACL':{userID:{'write':True,'read':True}}}
-    r = requests.put(url, data=json.dumps(payload), headers=headers)
-    print r.text
+	r = requests.put(url, data=json.dumps(payload), headers=headers)
+	print r.text
 
 
 def main(USERNAME,PASSWORD,SENSOR_ID):
