@@ -21,41 +21,36 @@ def LoginUser(USERNAME,PASSWORD):
 	return r['sessionToken'], r['objectId']
 
 
-def CheckUserStatus(USER_ID,SESSION_TOKEN,MY_LCD):
-	url = 'https://api.parse.com/1/users/' + USER_ID
+def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
+	url = 'https://api.parse.com/1/Igloosense/' + SENSOR_ID
 
 	headers = {'content-type':'application/json',
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
 	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
 	    'X-Parse-Session-Token': SESSION_TOKEN }
 
-	airconStatusChange = False
-	temperatureChange = False
+
 	messageChange = False
 	try:
 		r = requests.get(url, headers=headers)
 		#print r.text
 		r = json.loads(r.text)
-		airconStatusChange = r['airconStatusChange']
-		temperatureChange = r['airconTemperatureChange']
 		messageChange = r['messageChange']
 		#print messageChange
-		if (airconStatusChange or temperatureChange or messageChange):
-			if messageChange:
-				myMessage = r['message']
-				#print myMessage
-
-				MY_LCD.clear()
-				MY_LCD.message(myMessage)
-				data = {'messageChange':False}
-				g = requests.put(url,data=json.dumps(data),headers=headers)
-				#print g
-				#print g.text
+		if messageChange:
+			myMessage = r['message']
+			#print myMessage
+			MY_LCD.clear()
+			MY_LCD.message(myMessage)
+			data = {'messageChange':False}
+			g = requests.put(url,data=json.dumps(data),headers=headers)
+			#print g
+			#print g.text
 
 
 	except Exception,e:
 		print "Failed connecting with error at status check: ",e
-	return airconStatusChange, temperatureChange, messageChange
+	return messageChange
 
 
 
@@ -111,26 +106,38 @@ def BluetoothDiscovery():
 
 
 
-def SendDataToParse(data,USER_ID,SENSOR_ID):
+def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 	url = 'https://api.parse.com/1/classes/IgloosenseData'
 
-	payload = {'sensorId':SENSOR_ID,
-		'temperature':data['temperature'],
+	payload = {'temperature':data['temperature'],
 		'motion':data['motion'],
 		'brightness':data['brightness'],
 		'humidity':data['humidity'],
 		'numBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
 		'bluetoothDevicesDetected':data['bluetoothDevicesDetected'],
-		'ACL':{USER_ID:{'write':True,'read':True}}}		#sets the access control list to restrict access
+		'ACL':{USER_ID:{'write':True,'read':True}},
+		'igloosense':{"__type":"Pointer","className":"Igloosense","objectId":SENSOR_ID}}		#sets the access control list to restrict access
 
 	headers = {'content-type':'application/json',
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
-	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
+	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
+	    'X-Parse-Session-Token': SESSION_TOKEN}
 	try:
 		r = requests.post(url, data=json.dumps(payload), headers=headers)
 		#print r.text
 	except Exception,e:
 		print "Failed connecting with error at sending sensor data to parse: ",e
+
+    url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
+    payload = {'lastTemperature':data['temperature'],
+            'lastHumidity':data['humidity'],
+            'lastBrightness':data['brightness'],
+            'lastMotion':data['motion'],
+            'lastNumBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
+            'lastBluetoothPresenceArray':data['bluetoothDevicesDetected'],
+            'ACL':{userID:{'write':True,'read':True}}}
+    r = requests.put(url, data=json.dumps(payload), headers=headers)
+    print r.text
 
 
 def main(USERNAME,PASSWORD,SENSOR_ID):
@@ -142,8 +149,6 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 	lcd = Adafruit_CharLCD()
 	lcd.clear()
 	while True:
-
-
 	    
 		data = {'temperature':0,
 				'motion':0,
@@ -213,9 +218,9 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 		#print "Sending data to parse ... "
 
 
-		SendDataToParse(data,objectID,SENSOR_ID)
+		SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
 
-		detectedAirconStatusChange, detectedTemperatureChange, detectedMessageChange = CheckUserStatus(objectID,sessionToken,lcd)
+		detectedMessageChange = CheckIgloosenseStatus(SENSOR_ID,sessionToken,lcd)
 		if detectedMessageChange:
 			messageDelayCountdown = 2
 
@@ -229,7 +234,7 @@ if __name__ == '__main__':
 	if len(sys.argv) == 1:
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
-			SENSOR_ID = 'IglooHeadquarters'
+			SENSOR_ID = 'elFtIHZGjA'
 			main(USERNAME,PASSWORD,SENSOR_ID)
 	else:
 		print """---usage: python test.py once OR python test.py repeat
