@@ -23,7 +23,7 @@ def LoginUser(USERNAME,PASSWORD):
 
 def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
 
-	url = 'https://api.parse.com/1/Igloosense/' + SENSOR_ID
+	url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
 
 	headers = {'content-type':'application/json',
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
