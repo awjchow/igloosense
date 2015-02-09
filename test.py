@@ -16,9 +16,13 @@ def LoginUser(USERNAME,PASSWORD):
 	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}	
 
 	payload = {"username":USERNAME,"password":PASSWORD}
-	r = requests.get(url,params=payload, headers=headers)
-	r = json.loads(r.text)
-	return r['sessionToken'], r['objectId']
+	try:
+		r = requests.get(url,params=payload, headers=headers)
+		r = json.loads(r.text)
+		return r['sessionToken'], r['objectId']
+	except Exception,e:
+		print "Failed logging in with error : ", e
+		return None, None
 
 
 def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
@@ -138,13 +142,19 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
             'lastNumBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
             'lastBluetoothPresenceArray':data['bluetoothDevicesDetected'],
             'ACL':{USER_ID:{'write':True,'read':True}}}
-	r = requests.put(url, data=json.dumps(payload), headers=headers)
-	print r.text
+    try:
+		r = requests.put(url, data=json.dumps(payload), headers=headers)
+		#print r.text
+	except Exception,e:
+		print "Failed updating igloosense object with error: ",e
 
 
 def main(USERNAME,PASSWORD,SENSOR_ID):
 
 	sessionToken, objectID = LoginUser(USERNAME,PASSWORD)
+	if sessionToken == None and objectId == None:
+		print "Failed login, program exiting ..."
+		return 0
 	messageDelayCountdown = 0
 	GPIO.setmode(GPIO.BCM)
 
