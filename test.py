@@ -142,7 +142,7 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
             'lastNumBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
             'lastBluetoothPresenceArray':data['bluetoothDevicesDetected'],
             'ACL':{USER_ID:{'write':True,'read':True}}}
-    try:
+	try:
 		r = requests.put(url, data=json.dumps(payload), headers=headers)
 		#print r.text
 	except Exception,e:
