@@ -52,10 +52,13 @@ def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
 			#print g
 			#print g.text
 
+		return messageChange, False  #if False means request Igloosense to re login
 
 	except Exception,e:
 		print "Failed connecting with error at status check: ",e
-	return messageChange
+		
+		return "Error", True   #if True means request Igloosense to re login
+
 
 
 
@@ -112,6 +115,9 @@ def BluetoothDiscovery():
 
 
 def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
+
+	needToReLogin = False
+
 	url = 'https://api.parse.com/1/classes/IgloosenseData'
 
 	payload = {'temperature':data['temperature'],
@@ -129,6 +135,7 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 	    'X-Parse-Session-Token': SESSION_TOKEN}
 	try:
 		r = requests.post(url, data=json.dumps(payload), headers=headers)
+		needToReLogin = True
 		#print r.text
 	except Exception,e:
 		print "Failed connecting with error at sending sensor data to parse: ",e
@@ -143,9 +150,12 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
             'lastBluetoothPresenceArray':data['bluetoothDevicesDetected']}
 	try:
 		r = requests.put(url, data=json.dumps(payload), headers=headers)
+		needToReLogin = True
 		#print r.text
 	except Exception,e:
 		print "Failed updating igloosense object with error: ",e
+
+	return needToReLogin
 
 
 def main(USERNAME,PASSWORD,SENSOR_ID):
@@ -229,9 +239,15 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 		#print "Sending data to parse ... "
 
 
-		SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
+		needToReLogin = SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
 
-		detectedMessageChange = CheckIgloosenseStatus(SENSOR_ID,sessionToken,lcd)
+		detectedMessageChange, needToReLogin = CheckIgloosenseStatus(SENSOR_ID,sessionToken,lcd)
+
+		if needToReLogin:
+			sessionToken, objectID = LoginUser(USERNAME,PASSWORD)
+			needToReLogin = False
+
+
 		if detectedMessageChange:
 			messageDelayCountdown = 2
 
