@@ -140,8 +140,7 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
             'lastBrightness':data['brightness'],
             'lastMotion':data['motion'],
             'lastNumBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
-            'lastBluetoothPresenceArray':data['bluetoothDevicesDetected'],
-            'ACL':{USER_ID:{'write':True,'read':True}}}
+            'lastBluetoothPresenceArray':data['bluetoothDevicesDetected']}
 	try:
 		r = requests.put(url, data=json.dumps(payload), headers=headers)
 		#print r.text
