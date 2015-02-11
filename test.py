@@ -9,23 +9,40 @@ from Adafruit_CharLCD import Adafruit_CharLCD
 import bluetooth
 
 def LoginUser(USERNAME,PASSWORD):
-	url = 'https://api.parse.com/1/login'
+	"""
+		Function takes in username and password and returns the session token and object id
+		Retries to login again if error
+	"""
+	sessionToken = None
+	objectId = None
 
-	headers = {'content-type':'application/json',
-	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
-	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}	
+	while (sessionToken == None and objectId == None):
+		print "Logging in ..."
+		url = 'https://api.parse.com/1/login'
 
-	payload = {"username":USERNAME,"password":PASSWORD}
-	try:
-		r = requests.get(url,params=payload, headers=headers)
-		r = json.loads(r.text)
-		return r['sessionToken'], r['objectId']
-	except Exception,e:
-		print "Failed logging in with error : ", e
-		return None, None
+		headers = {'content-type':'application/json',
+		    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
+		    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}	
+
+		payload = {"username":USERNAME,"password":PASSWORD}
+		try:
+			r = requests.get(url,params=payload, headers=headers)
+			r = json.loads(r.text)
+			sessionToken = r['sessionToken']
+			objectId = r['objectId']
+			
+		except Exception,e:
+			print "Failed logging in with error : ", e
+			time.sleep(2)
+
+	return sessionToken, objectId
 
 
 def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
+	"""
+		Function is now deprecated because we do not check the igloosense status here now. 
+		Igloosense status is now shifted to IgloosenseControl class.
+	"""
 
 	url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
 
@@ -33,7 +50,6 @@ def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
 	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
 	    'X-Parse-Session-Token': SESSION_TOKEN }
-
 
 	messageChange = False
 	try:
@@ -115,6 +131,11 @@ def BluetoothDiscovery():
 
 
 def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
+	"""
+		Function sends data to parse.
+		- sends to IgloosenseData and sets the ACL of the data object to only readable by the Igloosense User
+		- sends to Igloosense to set the lastTemperature, lastHumidity etc. This object has an ACL to the Igloosense User, so if it failed submiting, it sets a flag that asks Igloosese to re-login
+	"""
 
 	needToReLogin = False
 
@@ -131,16 +152,19 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 
 	headers = {'content-type':'application/json',
 	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
-	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
-	    'X-Parse-Session-Token': SESSION_TOKEN}
+	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh'}
 	try:
 		r = requests.post(url, data=json.dumps(payload), headers=headers)
-		needToReLogin = True
 		#print r.text
 	except Exception,e:
 		print "Failed connecting with error at sending sensor data to parse: ",e
 
 	url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
+
+	headers = {'content-type':'application/json',
+	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
+	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
+	    'X-Parse-Session-Token': SESSION_TOKEN}
 
 	payload = {'lastTemperature':data['temperature'],
             'lastHumidity':data['humidity'],
@@ -150,10 +174,10 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
             'lastBluetoothPresenceArray':data['bluetoothDevicesDetected']}
 	try:
 		r = requests.put(url, data=json.dumps(payload), headers=headers)
-		needToReLogin = True
 		#print r.text
 	except Exception,e:
 		print "Failed updating igloosense object with error: ",e
+		needToReLogin = True
 
 	return needToReLogin
 
@@ -161,9 +185,7 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 def main(USERNAME,PASSWORD,SENSOR_ID):
 
 	sessionToken, objectID = LoginUser(USERNAME,PASSWORD)
-	if sessionToken == None and objectId == None:
-		print "Failed login, program exiting ..."
-		return 0
+
 	messageDelayCountdown = 0
 	GPIO.setmode(GPIO.BCM)
 
@@ -235,24 +257,23 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 		data['numBluetoothDevicesDetected'] = num_devices
 		data['bluetoothDevicesDetected'] = devices_array
 
-		#print "Motion boolean : ", motion
-		#print "Sending data to parse ... "
 
 
 		needToReLogin = SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
-
-		detectedMessageChange, needToReLogin = CheckIgloosenseStatus(SENSOR_ID,sessionToken,lcd)
 
 		if needToReLogin:
 			sessionToken, objectID = LoginUser(USERNAME,PASSWORD)
 			needToReLogin = False
 
-
+		"""
+		#This function is stopped because we no longer check igloosense status like this
+		detectedMessageChange, needToReLogin = CheckIgloosenseStatus(SENSOR_ID,sessionToken,lcd)
 		if detectedMessageChange:
 			messageDelayCountdown = 2
 
 		if messageDelayCountdown > 0:
 			messageDelayCountdown -= 1
+		"""
 
 		time.sleep(2)
 
