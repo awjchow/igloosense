@@ -7,7 +7,7 @@ sudo easy_install -U distribute
 sudo apt-get install python-pip
 sudo pip install rpi.gpio
 
-
+sudo apt-get install nodejs npm node-semver		#to install npm to get pm2
 
 #cd Temperature
 #sudo python setup.py install

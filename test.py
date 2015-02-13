@@ -35,6 +35,7 @@ def LoginUser(USERNAME,PASSWORD):
 			print "Failed logging in with error : ", e
 			time.sleep(2)
 
+	print "Loggin in with username : " + USERNAME + " and returned sessionToken: " + sessionToken + " and objectId: " + objectId
 	return sessionToken, objectId
 
 
