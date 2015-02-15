@@ -8,6 +8,7 @@ import os
 import json
 from Adafruit_CharLCD import Adafruit_CharLCD
 import bluetooth
+import logging
 
 def LoginUser(USERNAME,PASSWORD):
 	"""
@@ -19,6 +20,8 @@ def LoginUser(USERNAME,PASSWORD):
 
 	while (sessionToken == None and objectId == None):
 		print "Logging in ..."
+		logging.debug("========================================================")
+		logging.debug("Logging in ...")
 		url = 'https://api.parse.com/1/login'
 
 		headers = {'content-type':'application/json',
@@ -35,6 +38,8 @@ def LoginUser(USERNAME,PASSWORD):
 		except Exception,e:
 			print "Failed logging in with error : ", e
 			print "Restarting wifi ... "
+			logging.warning("Failed logging in with error : ", e)
+			logging.warning("Restarting wifi ... ")
 			os.system(os.getcwd() + "/checkwifi.sh")
 			time.sleep(10)
 
@@ -290,6 +295,9 @@ if __name__ == '__main__':
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
 			SENSOR_ID = 'elFtIHZGjA'
+			LOG_FILENAME = os.getcwd() + '/logs/collectDataFromSensors.log'
+			print "Creating log file at : " + LOG_FILENAME
+			logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
 			main(USERNAME,PASSWORD,SENSOR_ID)
 	else:
 		print """---usage: python test.py once OR python test.py repeat
