@@ -44,6 +44,7 @@ def LoginUser(USERNAME,PASSWORD):
 			time.sleep(10)
 
 	print "Loggin in with username : " + USERNAME + " and returned sessionToken: " + sessionToken + " and objectId: " + objectId
+	logging.debug("Loggin in with username : " + USERNAME + " and returned sessionToken: " + sessionToken + " and objectId: " + objectId)
 	return sessionToken, objectId
 
 
@@ -81,7 +82,7 @@ def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
 
 	except Exception,e:
 		print "Failed connecting with error at status check: ",e
-		
+		logging.warning("Failed connecting with error at status check: ",e)
 		return "Error", True   #if True means request Igloosense to re login
 
 
@@ -112,6 +113,7 @@ def RcAnalog(pin):
 		return 1 - ResolveLight(counter)
 	except Exception,e:
 		print "Error with light sensing with error : ",e
+		logging.warning("Error with light sensing with error : ",e)
 		return 0
 
 def MotionSensing(pin):
@@ -125,6 +127,7 @@ def MotionSensing(pin):
 		return GPIO.input(pin)
 	except Exception,e:
 		print "Error with motion sensing with error : ", e
+		logging.warning("Error with motion sensing with error : ",e)
 		return 0
 
 def BluetoothDiscovery():
@@ -135,6 +138,7 @@ def BluetoothDiscovery():
 		return nearby_devices
 	except Exception,e:
 		print "Error with bluetooth discovery with error : ", e
+		logging.warning("Error with bluetooth discovery with error : ",e)
 		return None
 
 
@@ -167,6 +171,7 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 		#print r.text
 	except Exception,e:
 		print "Failed connecting with error at sending sensor data to parse: ",e
+		logging.warning("Failed connecting with error at sending sensor data to parse: ",e)
 
 	url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
 
@@ -189,6 +194,7 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 		#print r.text
 	except Exception,e:
 		print "Failed updating igloosense object with error: ",e
+		logging.warning("Failed updating igloosense object with error: ",e)
 		needToReLogin = True
 
 	return needToReLogin
