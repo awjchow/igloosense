@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import time
 import datetime
 import requests
+import os
 import json
 from Adafruit_CharLCD import Adafruit_CharLCD
 import bluetooth
@@ -33,7 +34,9 @@ def LoginUser(USERNAME,PASSWORD):
 			
 		except Exception,e:
 			print "Failed logging in with error : ", e
-			time.sleep(2)
+			print "Restarting wifi ... "
+			os.system(os.getcwd() + "/checkwifi.sh")
+			time.sleep(10)
 
 	print "Loggin in with username : " + USERNAME + " and returned sessionToken: " + sessionToken + " and objectId: " + objectId
 	return sessionToken, objectId
@@ -172,7 +175,8 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
             'lastBrightness':data['brightness'],
             'lastMotion':data['motion'],
             'lastNumBluetoothDevicesDetected':data['numBluetoothDevicesDetected'],
-            'lastBluetoothPresenceArray':data['bluetoothDevicesDetected']}
+            'lastBluetoothPresenceArray':data['bluetoothDevicesDetected'],
+            'lastUpdatedFromIgloosense':datetime.datetime.now()}
 	try:
 		r = requests.put(url, data=json.dumps(payload), headers=headers)
 		#print r.text
