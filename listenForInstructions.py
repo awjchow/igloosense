@@ -4,6 +4,7 @@ import sys
 import time
 import json
 import logging
+import os
 
 def LoginUser(USERNAME,PASSWORD):
 	"""
