@@ -301,7 +301,7 @@ if __name__ == '__main__':
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
 			SENSOR_ID = 'elFtIHZGjA'
-			LOG_FILENAME = os.getcwd() + '/logs/'+SENSOR_ID+'-collectDataFromSensors.log'
+			LOG_FILENAME = os.getcwd() + '/sensor-logs/'+SENSOR_ID+'-collectDataFromSensors.log'
 			print "Creating log file at : " + LOG_FILENAME
 			logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p',filename=LOG_FILENAME,level=logging.INFO)
 			main(USERNAME,PASSWORD,SENSOR_ID)
