@@ -20,8 +20,8 @@ def LoginUser(USERNAME,PASSWORD):
 
 	while (sessionToken == None and objectId == None):
 		print "Logging in ..."
-		logging.debug("========================================================")
-		logging.debug("Logging in ...")
+		logging.warning("========================================================")
+		logging.warning("Logging in ...")
 		url = 'https://api.parse.com/1/login'
 
 		headers = {'content-type':'application/json',
@@ -44,7 +44,7 @@ def LoginUser(USERNAME,PASSWORD):
 			time.sleep(10)
 
 	print "Loggin in with username : " + USERNAME + " and returned sessionToken: " + sessionToken + " and objectId: " + objectId
-	logging.debug("Loggin in with username : " + USERNAME + " and returned sessionToken: " + sessionToken + " and objectId: " + objectId)
+	logging.warning("Loggin in with username : " + USERNAME + " and returned sessionToken: " + sessionToken + " and objectId: " + objectId)
 	return sessionToken, objectId
 
 
@@ -303,7 +303,7 @@ if __name__ == '__main__':
 			SENSOR_ID = 'elFtIHZGjA'
 			LOG_FILENAME = os.getcwd() + '/logs/'+SENSOR_ID+'-collectDataFromSensors.log'
 			print "Creating log file at : " + LOG_FILENAME
-			logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
+			logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p',filename=LOG_FILENAME,level=logging.INFO)
 			main(USERNAME,PASSWORD,SENSOR_ID)
 	else:
 		print """---usage: python test.py once OR python test.py repeat

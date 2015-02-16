@@ -3,6 +3,7 @@ import requests
 import sys
 import time
 import json
+import logging
 
 def LoginUser(USERNAME,PASSWORD):
 	"""
@@ -14,6 +15,8 @@ def LoginUser(USERNAME,PASSWORD):
 
 	while (sessionToken == None and objectId == None):
 		print "Logging in ..."
+		logging.warning("==============================================================")
+		logging.warning("Loggin in ... ")
 		url = 'https://api.parse.com/1/login'
 
 		headers = {'content-type':'application/json',
@@ -29,6 +32,7 @@ def LoginUser(USERNAME,PASSWORD):
 			
 		except Exception,e:
 			print "Failed logging in with error : ", e
+			logging.warning("Failed logging in with error : ", e)
 			time.sleep(2)
 
 	return sessionToken, objectId
@@ -58,7 +62,9 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 		#print r.text
 	except Exception,e:
 		print "Failed connecting with error at sending sensor data to parse: ",e
+		logging.warning("Failed connecting with error at sending sensor data to parse: ",e)
 
+	"""
 	url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
 
 	headers = {'content-type':'application/json',
@@ -74,6 +80,7 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 	except Exception,e:
 		print "Failed updating igloosense object with error: ",e
 		needToReLogin = True
+	"""
 
 	return needToReLogin
 
@@ -92,16 +99,20 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 		if message['airconStatus']:
 			if message['airconStatus'] == 'on':
 				print "Lets turn on air con now"
+				logging.warning("Lets turn on air con now")
 			else:
 				print "lets turn off aircon now"
+				logging.warning("Lets turn off air con now")
 			data['status'] = message['airconStatus']	
 		if message['targetTemperature']:
 			print "Lets turn aircon to : ", message['targetTemperature']
+			logging.warning("Lets turn aircon to : ", message['targetTemperature'])
 			data['targetTemperature'] = message['targetTemperature']
 		needToReLogin = SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
 
 	def _error(message):
 		print("Error: ",message)
+		logging.warning("Error: ",message)
 
 
 	pubnub.subscribe(channel, callback=_callback, error=_error)
@@ -112,6 +123,9 @@ if __name__ == '__main__':
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
 			SENSOR_ID = 'elFtIHZGjA'
+			LOG_FILENAME = os.getcwd() + '/logs/'+SENSOR_ID+'-listenForInstructions.log'
+			print "Creating log file at : " + LOG_FILENAME
+			logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p',filename=LOG_FILENAME,level=logging.INFO)
 			main(USERNAME,PASSWORD,SENSOR_ID)
 	else:
 		print """---usage: python test.py once OR python test.py repeat
