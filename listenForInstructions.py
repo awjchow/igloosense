@@ -107,7 +107,7 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 			data['status'] = message['airconStatus']	
 		if message['targetTemperature']:
 			print "Lets turn aircon to : ", message['targetTemperature']
-			logging.warning("Lets turn aircon to : ", message['targetTemperature'])
+			logging.warning("Lets turn aircon to : " + str(message['targetTemperature']))
 			data['targetTemperature'] = message['targetTemperature']
 		needToReLogin = SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
 
