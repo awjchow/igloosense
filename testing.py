@@ -6,7 +6,7 @@ import os
 
 MY_LOG_DIRECTORY = os.getcwd() + '/test-logs/'
 if not os.path.exists(MY_LOG_DIRECTORY):
-	os.makedir(MY_LOG_DIRECTORY)
+	os.mkdir(MY_LOG_DIRECTORY)
 	#os.chmod(MY_LOG_DIRECTORY, 0777)
 
 uid = pwd.getpwnam("pi").pw_uid
