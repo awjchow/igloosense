@@ -20,7 +20,7 @@ def LoginUser(USERNAME,PASSWORD):
 
 	while (sessionToken == None and objectId == None):
 		print "Logging in ..."
-		logging.warning("========================================================")
+		logging.warning("===============collectDataFromSensors.py========================")
 		logging.warning("Logging in ...")
 		url = 'https://api.parse.com/1/login'
 
@@ -302,7 +302,7 @@ if __name__ == '__main__':
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
 			SENSOR_ID = 'elFtIHZGjA'
-			LOG_FILENAME = os.getcwd() + '/sensor-logs/'+SENSOR_ID+'-collectDataFromSensors.log'
+			LOG_FILENAME = os.getcwd() + '/sensor-logs/'+SENSOR_ID+'.log'
 			print "Creating log file at : " + LOG_FILENAME
 			logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p',filename=LOG_FILENAME,level=logging.INFO)
 			main(USERNAME,PASSWORD,SENSOR_ID)
