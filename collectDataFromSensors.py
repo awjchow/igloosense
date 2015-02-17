@@ -304,7 +304,7 @@ if __name__ == '__main__':
 			SENSOR_ID = 'elFtIHZGjA'
 			MY_LOG_DIRECTORY = os.getcwd() + '/sensor-logs/'
 			if not os.path.exists(MY_LOG_DIRECTORY):
-				os.makedirs(MY_LOG_DIRECTORY,644)
+				os.makedirs(MY_LOG_DIRECTORY,0644)
 			LOG_FILENAME = MY_LOG_DIRECTORY+SENSOR_ID+'.log'
 			print "Creating log file at : " + LOG_FILENAME
 			logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p',filename=LOG_FILENAME,level=logging.INFO)
