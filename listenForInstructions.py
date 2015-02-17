@@ -124,7 +124,7 @@ if __name__ == '__main__':
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
 			SENSOR_ID = 'elFtIHZGjA'
-			MY_LOG_DIRECTORY = os.getcwd() + '/activity-logs/'
+			MY_LOG_DIRECTORY = os.getcwd() + '/logs/'
 			if not os.path.exists(MY_LOG_DIRECTORY):
 				os.makedirs(MY_LOG_DIRECTORY)
 				os.chmod(MY_LOG_DIRECTORY, 0777)
