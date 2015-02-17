@@ -124,7 +124,10 @@ if __name__ == '__main__':
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
 			SENSOR_ID = 'elFtIHZGjA'
-			LOG_FILENAME = os.getcwd() + '/activity-logs/'+SENSOR_ID+'.log'
+			MY_LOG_DIRECTORY = os.getcwd() + '/activity-logs/'
+			if not os.path.exists(MY_LOG_DIRECTORY):
+    			os.makedirs(MY_LOG_DIRECTORY)
+			LOG_FILENAME = MY_LOG_DIRECTORY+SENSOR_ID+'.log'
 			print "Creating log file at : " + LOG_FILENAME
 			logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p',filename=LOG_FILENAME,level=logging.INFO)
 			main(USERNAME,PASSWORD,SENSOR_ID)
