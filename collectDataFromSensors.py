@@ -5,6 +5,8 @@ import time
 import datetime
 import requests
 import os
+import pwd
+import grp
 import json
 from Adafruit_CharLCD import Adafruit_CharLCD
 import bluetooth
@@ -302,13 +304,19 @@ if __name__ == '__main__':
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
 			SENSOR_ID = 'elFtIHZGjA'
+			uid = pwd.getpwnam("pi").pw_uid
+			gid = grp.getgrnam("pi").gr_gid
+
 			MY_LOG_DIRECTORY = os.getcwd() + '/logs/'
 			if not os.path.exists(MY_LOG_DIRECTORY):
 				os.makedirs(MY_LOG_DIRECTORY)
-				os.chmod(MY_LOG_DIRECTORY, 0777)
+				os.chown(MY_LOG_DIRECTORY, uid, gid)
+
 			LOG_FILENAME = MY_LOG_DIRECTORY+SENSOR_ID+'.log'
 			print "Creating log file at : " + LOG_FILENAME
 			logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p',filename=LOG_FILENAME,level=logging.INFO)
+			os.chown(LOG_FILENAME, uid, gid)
+
 			main(USERNAME,PASSWORD,SENSOR_ID)
 	else:
 		print """---usage: python test.py once OR python test.py repeat

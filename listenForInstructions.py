@@ -5,6 +5,8 @@ import time
 import json
 import logging
 import os
+import pwd
+import grp
 from Adafruit_CharLCD import Adafruit_CharLCD
 
 def LoginUser(USERNAME,PASSWORD):
@@ -124,13 +126,20 @@ if __name__ == '__main__':
 			USERNAME = 'igloo'
 			PASSWORD = 'igloo'
 			SENSOR_ID = 'elFtIHZGjA'
+			uid = pwd.getpwnam("pi").pw_uid
+			gid = grp.getgrnam("pi").gr_gid
+
+
 			MY_LOG_DIRECTORY = os.getcwd() + '/logs/'
 			if not os.path.exists(MY_LOG_DIRECTORY):
-				os.makedirs(MY_LOG_DIRECTORY)
-				os.chmod(MY_LOG_DIRECTORY, 0777)
+				os.mkdir(MY_LOG_DIRECTORY)
+				os.chown(MY_LOG_DIRECTORY, uid, gid)
+
 			LOG_FILENAME = MY_LOG_DIRECTORY+SENSOR_ID+'.log'
 			print "Creating log file at : " + LOG_FILENAME
 			logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p',filename=LOG_FILENAME,level=logging.INFO)
+			os.chown(LOG_FILENAME, uid, gid)
+
 			main(USERNAME,PASSWORD,SENSOR_ID)
 	else:
 		print """---usage: python test.py once OR python test.py repeat
