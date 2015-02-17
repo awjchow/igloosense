@@ -207,8 +207,8 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 	messageDelayCountdown = 0
 	GPIO.setmode(GPIO.BCM)
 
-	lcd = Adafruit_CharLCD()
-	lcd.clear()
+	#lcd = Adafruit_CharLCD()
+	#lcd.clear()
 	while True:
 	    
 		data = {'temperature':0,
@@ -242,9 +242,10 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 			data['temperature'] = temperature
 			#print 'Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(temperature, humidity)
 
-			if messageDelayCountdown == 0:
-				lcd.clear()
-				lcd.message("Your temperature\n"+"Temp={0:0.1f}*C".format(temperature))
+
+			#if messageDelayCountdown == 0:
+			#	lcd.clear()
+			#	lcd.message("Your temperature\n"+"Temp={0:0.1f}*C".format(temperature))
 		else:
 			#print 'Failed to get reading. Try again!'
 			data['humidity'] = 0

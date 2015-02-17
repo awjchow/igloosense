@@ -5,6 +5,7 @@ import time
 import json
 import logging
 import os
+from Adafruit_CharLCD import Adafruit_CharLCD
 
 def LoginUser(USERNAME,PASSWORD):
 	"""
@@ -65,27 +66,12 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 		print "Failed connecting with error at sending sensor data to parse: ",e
 		logging.warning("Failed connecting with error at sending sensor data to parse: ",e)
 
-	"""
-	url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
 
-	headers = {'content-type':'application/json',
-	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
-	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
-	    'X-Parse-Session-Token': SESSION_TOKEN}
-
-	payload = {'lastStatus':data['status'],
-				'targetTemperature':data['targetTemperature']}
-	try:
-		r = requests.put(url, data=json.dumps(payload), headers=headers)
-		#print r.text
-	except Exception,e:
-		print "Failed updating igloosense object with error: ",e
-		needToReLogin = True
-	"""
-
-	return needToReLogin
 
 def main(USERNAME,PASSWORD,SENSOR_ID):
+
+	lcd = Adafruit_CharLCD()
+	lcd.clear()
 
 	sessionToken, objectID = LoginUser(USERNAME,PASSWORD)
 
@@ -100,16 +86,30 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 		if message['airconStatus']:
 			if message['airconStatus'] == 'on':
 				print "Lets turn on air con now"
+				lcd.clear()
+				lcd.message("Aircon On!")
 				logging.warning("Lets turn on air con now")
 			else:
 				print "lets turn off aircon now"
+				lcd.clear()
+				lcd.message("Aircon Off!\n  Have a good day!")
 				logging.warning("Lets turn off air con now")
 			data['status'] = message['airconStatus']	
 		if message['targetTemperature']:
 			print "Lets turn aircon to : ", message['targetTemperature']
+
+			lcd.clear()
+			lcd.message("Setting temperature\n"+"Temp={0:0.1f}*C".format(message['targetTemperature']))
+
 			logging.warning("Lets turn aircon to : " + str(message['targetTemperature']))
 			data['targetTemperature'] = message['targetTemperature']
-		needToReLogin = SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
+
+		if message['switchOffLCD']:		#note that this might happen a few times because current logic is if last activity was more than 3 mins ago, we swtich off
+			print "Lets switch off LCD"
+			lcd.clear()
+			logging.warning("switching off LCD")
+
+		SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
 
 	def _error(message):
 		print("Error: ",message)
