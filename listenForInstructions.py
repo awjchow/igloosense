@@ -68,6 +68,25 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 		print "Failed connecting with error at sending sensor data to parse: ",e
 		logging.warning("Failed connecting with error at sending sensor data to parse: ",e)
 
+	url = 'https://api.parse.com/1/classes/Igloosense/' + SENSOR_ID
+
+	headers = {'content-type':'application/json',
+	    'X-Parse-Application-Id': 'OW1IJfhxLt0wIJ5WTowtvDv9suPyMaWMA3BtYG1F',
+	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
+	    'X-Parse-Session-Token': SESSION_TOKEN}
+
+	payload = {'lastStatus':data['status'],
+				'targetTemperature':data['targetTemperature']}
+	try:
+		r = requests.put(url, data=json.dumps(payload), headers=headers)
+		#print r.text
+	except Exception,e:
+		print "Failed updating igloosense object with error: ",e
+		logging.warning("Failed updating igloosense object with error: ",e)
+		needToReLogin = True
+
+	return needToReLogin
+
 
 
 def main(USERNAME,PASSWORD,SENSOR_ID):
@@ -111,7 +130,7 @@ def main(USERNAME,PASSWORD,SENSOR_ID):
 			lcd.clear()
 			logging.warning("switching off LCD")
 
-		SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
+		needToReLogin = SendDataToParse(data,objectID,sessionToken,SENSOR_ID)
 
 	def _error(message):
 		print("Error: ",message)
