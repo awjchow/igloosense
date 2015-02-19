@@ -75,8 +75,11 @@ def SendDataToParse(data,USER_ID,SESSION_TOKEN,SENSOR_ID):
 	    'X-Parse-REST-API-Key': 'vTJjmpVQGM43RdUhTCXv0aOAbQ3sNm8RkyOmc7kh',
 	    'X-Parse-Session-Token': SESSION_TOKEN}
 
-	payload = {'lastStatus':data['status'],
-				'targetTemperature':data['targetTemperature']}
+	if data['status']:
+		payload = {'lastStatus':data['status'],
+					'targetTemperature':data['targetTemperature']}
+	else:
+		payload = {'targetTemperature':data['targetTemperature']}
 	try:
 		r = requests.put(url, data=json.dumps(payload), headers=headers)
 		#print r.text
