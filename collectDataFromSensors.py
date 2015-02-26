@@ -92,7 +92,7 @@ def CheckIgloosenseStatus(SENSOR_ID,SESSION_TOKEN,MY_LCD):
 
 
 def ResolveLight(score):
-    LOWEST = 70     #brightest
+    LOWEST = 40     #brightest
     HIGHEST = 175   #darkest
     score = (score - LOWEST) / float(HIGHEST - LOWEST)
     return score
